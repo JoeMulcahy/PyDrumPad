@@ -1,0 +1,10 @@
+Features
+    - 16 drum pads
+    - works with midi device
+    - presets
+    - load sound into pad
+    - repeater functionality
+    - press pad to edit sound
+        - vol, pitch, start/end sample, visual waveform
+    - velocity sensitive
+    - effects
