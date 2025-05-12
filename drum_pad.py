@@ -8,7 +8,6 @@ class DrumPad(QWidget):
     def __init__(self, midi_number, pad_text="", width=60, height=60):
         super().__init__()
         self.__btn_pad = QPushButton()
-        DrumPad._pad_id += 1
         self.__id = DrumPad._pad_id
         self.__midi_number = midi_number
         self.__width = width
@@ -51,20 +50,13 @@ class DrumPad(QWidget):
         layout.addWidget(self.__btn_pad)
         self.setLayout(layout)
 
-    # def button_press(self):
-    #     if self.__is_selected:
-    #         self.__is_selected = False
-    #         self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
-    #     elif not self.__is_selected:
-    #         self.__is_selected = True
-    #         self.__btn_pad.setStyleSheet(self.__drum_pad_selected_style)
+        DrumPad._pad_id += 1
 
     def select(self):
         self.__is_selected = True
         self.__btn_pad.setStyleSheet(self.__drum_pad_selected_style)
 
     def unselect(self):
-        print(f'{self.__id} unselected')
         self.__is_selected = False
         self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
 

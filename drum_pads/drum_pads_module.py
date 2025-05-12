@@ -10,9 +10,13 @@ class DrumPadModule(QWidget):
         super().__init__()
         self.__midi_notes_dict: dict = mn.MIDI_NOTE_NUMBER_TO_MUSIC_NOTE_DICT
         self.__bank_index = 3
-        self.__pads_visible_list = []
+        self.__pads_list = []
+        self.__currently_selected_pad_index = 0
         self.__bank_buttons_list = []
         self.__pad_voices = []
+
+        self.__bank_btn_default_style = ""
+        self.__bank_btn_selected_style = "QPushButton { background-color: #999999}"
 
         bank_buttons_layout = QGridLayout()
         for i in range(0, 6):
@@ -21,23 +25,26 @@ class DrumPadModule(QWidget):
             self.__bank_buttons_list.append(btn)
             bank_buttons_layout.addWidget(btn, 0, i, 1, 1, Qt.AlignmentFlag.AlignCenter)
 
-        pads_layout = QGridLayout()
-        pads_layout.setSpacing(1)
+
+
+        self.__pads_layout = QGridLayout()
+        self.__pads_layout.setSpacing(1)
+
+        # create pads list
+        for i in range(len(mn.MIDI_NOTE_NUMBERS_LIST)):
+            midi_note = mn.MIDI_NOTE_NUMBERS_LIST[i]
+            music_note = mn.MUSIC_NOTES_LIST[i]
+            pad = DrumPad(midi_note, music_note)
+            self.__pads_list.append(pad)
+
         # 4 x 4 pads
-        for row in range(0, 4):
-            for col in range(0, 4):
-                num = row * 4 + col
-                key = 60 + num
-                note = self.__midi_notes_dict[key]
-                pad = DrumPad(60 + num, note)
-                self.__pads_visible_list.append(pad)
-                pads_layout.addWidget(pad, 4 - row, col, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.__update_visible_pads()
 
         group_box = QGroupBox('Pads')
 
         module_layout = QGridLayout()
         module_layout.addLayout(bank_buttons_layout, 0, 0, )
-        module_layout.addLayout(pads_layout, 1, 0)
+        module_layout.addLayout(self.__pads_layout, 1, 0)
 
         group_box.setLayout(module_layout)
 
@@ -45,25 +52,59 @@ class DrumPadModule(QWidget):
         main_layout.addWidget(group_box)
         self.setLayout(main_layout)
 
+        self.__set_bank_index(3)
+
         # listeners for bank buttons
         for i in range(len(self.__bank_buttons_list)):
             button = self.__bank_buttons_list[i]
             button.clicked.connect(lambda clicked, index=i: self.__set_bank_index(index))
 
         # listener for pads
-        for i, btn in enumerate(self.__pads_visible_list):
+        for i, btn in enumerate(self.__pads_list):
             button = btn.button
             button.clicked.connect(lambda clicked, index=i: self.__highlight_selected(index))
 
     def __highlight_selected(self, index):
-        for pad in self.__pads_visible_list:
+        for pad in self.__pads_list:
             pad.unselect()
 
-        self.__pads_visible_list[index].select()
+        self.__pads_list[index].select()
+        self.__currently_selected_pad_index = index
 
     def __set_bank_index(self, index):
+        for btn in self.__bank_buttons_list:
+            btn.setStyleSheet(self.__bank_btn_default_style)
+
+        self.__bank_buttons_list[index].setStyleSheet(self.__bank_btn_selected_style)
+
         self.__bank_index = index
+        self.__clear_grid_layout()
+        self.__update_visible_pads()
+        self.__highlight_selected(self.__currently_selected_pad_index)
 
     def __update_visible_pads(self):
-        pass
+        visible_pads = []
+        for i in range(0, 16):
+            visible_pads.append(self.__pads_list[self.__bank_index * 16 + i])
+
+        for row in range(0, 4):
+            for col in range(0, 4):
+                pad = visible_pads[row * 4 + col]
+                self.__pads_layout.addWidget(pad, 3 - row, col, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+    def __clear_grid_layout(self):
+        while self.__pads_layout.count():
+            item = self.__pads_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)  # Removes the widget from the GUI
+            else:
+                # If it's a layout or spacer, you might need to handle it differently
+                sub_layout = item.layout()
+                if sub_layout is not None:
+                    self.clear_grid_layout(sub_layout)  # Recursively clear nested layouts
+
+
+
+
 
