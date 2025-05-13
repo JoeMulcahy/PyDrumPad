@@ -73,17 +73,18 @@ class DrumPadModule(QWidget):
         # listener for pads
         for i, btn in enumerate(self.__pads_list):
             button = btn.button
-            button.clicked.connect(lambda clicked, index=i: self.__highlight_selected(index))
-            button.pressed.connect(lambda index=i: self.__trigger_pad(index))
+            button.clicked.connect(lambda clicked, index=i: self.highlight_selected(index))
+            button.pressed.connect(lambda index=i: self.trigger_pad(index))
 
-    def __highlight_selected(self, index):
+
+    def highlight_selected(self, index):
         for pad in self.__pads_list:
             pad.unselect()
 
         self.__pads_list[index].select()
         self.__currently_selected_pad_index = index
 
-    def __trigger_pad(self, index):
+    def trigger_pad(self, index):
         self.__audio_channels_list[index].trigger()
 
     def __set_bank_index(self, index):
@@ -95,7 +96,7 @@ class DrumPadModule(QWidget):
         self.__bank_index = index
         self.__clear_grid_layout()
         self.__update_visible_pads()
-        self.__highlight_selected(self.__currently_selected_pad_index)
+        self.highlight_selected(self.__currently_selected_pad_index)
 
     def __update_visible_pads(self):
         visible_pads = []
@@ -139,3 +140,9 @@ class DrumPadModule(QWidget):
     def __add_channels_to_engine(self):
         for channel in self.__audio_channels_list:
             self.__sound_engine.add_channel(channel)
+
+    @property
+    def drum_pads_module(self):
+        return self
+
+

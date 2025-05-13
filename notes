@@ -9,7 +9,12 @@ Features
     - velocity sensitive
     - effects
 
+Ideas
+    - mode to arrange pads like a keyboards
+
 Audio Engine tweaks
 -   sound channel
     -   does voice have to be triggers here. Move trigger() to voice
     -   let audio channel accept a list of voices instead of just one
+-   continuous voices
+    -   instead of fixed voices. Allows for realtime changes to voices

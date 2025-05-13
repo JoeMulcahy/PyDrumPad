@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QMainWindow, QWidget, QGridLayout
 
+from drum_pad_app import DrumPadApp
 from drum_pads.drum_pads_module import DrumPadModule
+from globals_controls.globals_settings_module import GlobalControls
 
 
 class MainWindow(QMainWindow):
@@ -9,8 +11,12 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle('PyPad')
         self.central_widget = QWidget()
-        self.app_layout = QGridLayout()
-        self.pads = DrumPadModule()
-        self.app_layout.addWidget(self.pads)
-        self.central_widget.setLayout(self.app_layout)
+
+        self.drum_pad_app = DrumPadApp()
+
+        self.layout = QGridLayout()
+        self.layout.addWidget(self.drum_pad_app)
+
+
+        self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
