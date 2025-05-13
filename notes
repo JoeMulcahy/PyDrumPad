@@ -1,20 +1,25 @@
-Features
-    - 16 drum pads
-    - works with midi device
-    - presets
-    - load sound into pad
-    - repeater functionality
-    - press pad to edit sound
-        - vol, pitch, start/end sample, visual waveform
-    - velocity sensitive
-    - effects
 
-Ideas
-    - mode to arrange pads like a keyboards
+TO DO
+    - load audio sample to pad
+    - load samples on init
+    - align sample start and end pos with sample view start and end
+    - implement pitch, stretch sample. Update sample view to reflect changes
+    - load preset
+    - save preset
+    - reduce midi latency
+
+Nice to haves
+    - load multiple samples on a single pad. Use note and velocity to trigger sample
+    - sound fx
 
 Audio Engine tweaks
 -   sound channel
     -   does voice have to be triggers here. Move trigger() to voice
     -   let audio channel accept a list of voices instead of just one
--   continuous voices
-    -   instead of fixed voices. Allows for realtime changes to voices
+    -   add continuous voices (instead of fixed voices). Allows for realtime changes to voices
+    -   changeable audio buffer in sound engine
+    -   allow for user settings [buffer size, sample rate]
+    -   aux channels
+
+Ideas
+    - mode to arrange pads like a keyboards

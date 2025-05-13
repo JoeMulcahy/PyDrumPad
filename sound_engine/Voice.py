@@ -14,6 +14,8 @@ class Voice:
         self.__original_sample_rate = samplerate
         self.__original_voice_length = self.__original_data.shape[0]
         self.__position = 0  # Current playback index
+        self.__voice_start_position = 0
+        self.__end_position = 0
         self.__active = True
         self._playback_thread = None  # To keep track of the playback thread
         self.__pitch_factor = 0.5  # Default pitch factor (1.0 means no change)
@@ -32,8 +34,8 @@ class Voice:
             return np.zeros((frames, self.__data.shape[1] if self.__data.ndim > 1 else 1),
                             dtype=np.float32)
 
-        end = self.__position + frames
-        chunk = self.__data[self.__position:end]
+        self.__end_position = self.__position + frames
+        chunk = self.__data[self.__position:self.__end_position]
 
         # Ensure chunk is 2D
         if chunk.ndim == 1:
@@ -41,7 +43,7 @@ class Voice:
         elif chunk.ndim > 2:
             chunk = chunk.squeeze(axis=1)
 
-        self.__position = end
+        self.__position = self.__end_position
 
         # Pad with zeros if end of audio
         if len(chunk) < frames:
@@ -89,6 +91,19 @@ class Voice:
         except Exception as e:
             print(f"Error during resampling: {e}")
             raise
+
+    ############################################################################
+    ##  Set voice start and end positions
+    ############################################################################
+    def set_voice_start_and_end_position(self, start, end):
+        # start and end 0.0 - 1.0
+        if start < end:
+            print(f'start:{start} end:{end}')
+            total_samples = self.__data.shape[0]
+            self.__position = int(start * total_samples)
+            self.__end_position = int(total_samples - (total_samples * end))
+        else:
+            print('start cant be greater than end')
 
     ############################################################################
     ## Alter voice duration
@@ -192,3 +207,15 @@ class Voice:
     def reset_voice(self):
         self.__data = self.__original_data
         self.__samplerate = self.__original_sample_rate
+
+    @property
+    def voice_data(self):
+        return self.__data
+
+    @property
+    def position(self):
+        return self.__position
+
+    @property
+    def end_position(self):
+        return self.__end_position

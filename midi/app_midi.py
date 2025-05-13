@@ -1,15 +1,18 @@
 import mido
+from mido.backends import rtmidi
+
 from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QThread
 
 
 class MidiWorker(QObject):
-    midi_message_received = pyqtSignal(object)
+    midi_message_received_signal = pyqtSignal(object)
 
     def __init__(self, port):
         super().__init__()
         self.__port = port
         self.__is_running = True
         self.__inport = None
+        mido.set_backend('mido.backends.rtmidi')
 
     @pyqtSlot()
     def run(self):
@@ -24,7 +27,7 @@ class MidiWorker(QObject):
         if not self.__is_running:
             return
 
-        self.midi_message_received.emit(msg)
+        self.midi_message_received_signal.emit(msg)
 
     def stop(self):
         print("Stopping MIDI Worker.")
@@ -36,8 +39,8 @@ class MidiWorker(QObject):
 
 class AppMidi(QObject):
     mm_signal_note_on = pyqtSignal(bool, int, int)
-    mm_signal_note_off = pyqtSignal(bool, int)    # on/off, note value
-    mm_signal_cc = pyqtSignal(int, int)     # cc, value
+    mm_signal_note_off = pyqtSignal(bool, int)  # on/off, note value
+    mm_signal_cc = pyqtSignal(int, int)  # cc, value
 
     def __init__(self):
         super().__init__()
@@ -77,7 +80,7 @@ class AppMidi(QObject):
         self.__thread.finished.connect(self.__midi_worker.deleteLater)
 
         # Connect signal to your handler method
-        self.__midi_worker.midi_message_received.connect(self.process_midi_message)
+        self.__midi_worker.midi_message_received_signal.connect(self.process_midi_message)
 
         self.__thread.start()
 
@@ -98,7 +101,8 @@ class AppMidi(QObject):
         elif msg.type == 'control_change':
             self.mm_signal_cc.emit(msg.control, msg.value)
         else:
-            print(f"Other Message  - {msg}")
+            pass
+            # print(f"Other Message  - {msg}")
 
     @property
     def ports_list(self):

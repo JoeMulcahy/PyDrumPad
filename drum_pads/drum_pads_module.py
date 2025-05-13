@@ -124,7 +124,7 @@ class DrumPadModule(QWidget):
         temp_list = []
         for i in range(len(mn.NOTE_FREQUENCIES_LIST)):
             freq = mn.NOTE_FREQUENCIES_LIST[i]
-            voice = SynthVoice(WaveForm.TRIANGLE, float(freq), 1.0, 1.0, 44100)
+            voice = SynthVoice(WaveForm.TRIANGLE, float(freq), 0.2, 1.0, 44100)
             temp_list.append(voice)
 
         return temp_list
@@ -144,5 +144,22 @@ class DrumPadModule(QWidget):
     @property
     def drum_pads_module(self):
         return self
+
+    @property
+    def pad_list(self):
+        return self.__pads_list
+
+    @property
+    def pad_voices(self):
+        return self.__pad_voices_list
+
+    @property
+    def current_selected_pad(self):
+        return self.__currently_selected_pad_index
+
+    @property
+    def current_selected_voice(self):
+        return self.__pad_voices_list[self.__currently_selected_pad_index]
+
 
 
