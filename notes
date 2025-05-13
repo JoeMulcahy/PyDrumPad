@@ -8,3 +8,8 @@ Features
         - vol, pitch, start/end sample, visual waveform
     - velocity sensitive
     - effects
+
+Audio Engine tweaks
+-   sound channel
+    -   does voice have to be triggers here. Move trigger() to voice
+    -   let audio channel accept a list of voices instead of just one

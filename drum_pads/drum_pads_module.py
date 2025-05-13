@@ -1,8 +1,12 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QPushButton
 
+from app_enums.wave_form_enum import WaveForm
 from drum_pad import DrumPad
 import utility.music_notes as mn
+from sound_engine.AudioChannel import AudioChannel
+from sound_engine.SoundEngine import SoundEngine
+from sound_engine.SynthVoice import SynthVoice
 
 
 class DrumPadModule(QWidget):
@@ -13,19 +17,25 @@ class DrumPadModule(QWidget):
         self.__pads_list = []
         self.__currently_selected_pad_index = 0
         self.__bank_buttons_list = []
-        self.__pad_voices = []
+        self.__pad_voices_list = []
+        self.__audio_channels_list = []
 
         self.__bank_btn_default_style = ""
         self.__bank_btn_selected_style = "QPushButton { background-color: #999999}"
 
+        # initialise sound engine and audio channels
+        self.__sound_engine = SoundEngine()
+        self.__pad_voices_list = self.__create_pad_voices()
+        self.__audio_channels_list = self.__create_audio_channels()
+        self.__add_channels_to_engine()
+
+        # banks initialisation
         bank_buttons_layout = QGridLayout()
         for i in range(0, 6):
             btn = QPushButton(f'{i + 1}')
             btn.setFixedSize(30, 30)
             self.__bank_buttons_list.append(btn)
             bank_buttons_layout.addWidget(btn, 0, i, 1, 1, Qt.AlignmentFlag.AlignCenter)
-
-
 
         self.__pads_layout = QGridLayout()
         self.__pads_layout.setSpacing(1)
@@ -37,7 +47,7 @@ class DrumPadModule(QWidget):
             pad = DrumPad(midi_note, music_note)
             self.__pads_list.append(pad)
 
-        # 4 x 4 pads
+        # display current pads
         self.__update_visible_pads()
 
         group_box = QGroupBox('Pads')
@@ -53,6 +63,7 @@ class DrumPadModule(QWidget):
         self.setLayout(main_layout)
 
         self.__set_bank_index(3)
+        self.__sound_engine.play()  # active sound engine
 
         # listeners for bank buttons
         for i in range(len(self.__bank_buttons_list)):
@@ -63,6 +74,7 @@ class DrumPadModule(QWidget):
         for i, btn in enumerate(self.__pads_list):
             button = btn.button
             button.clicked.connect(lambda clicked, index=i: self.__highlight_selected(index))
+            button.pressed.connect(lambda index=i: self.__trigger_pad(index))
 
     def __highlight_selected(self, index):
         for pad in self.__pads_list:
@@ -70,6 +82,9 @@ class DrumPadModule(QWidget):
 
         self.__pads_list[index].select()
         self.__currently_selected_pad_index = index
+
+    def __trigger_pad(self, index):
+        self.__audio_channels_list[index].trigger()
 
     def __set_bank_index(self, index):
         for btn in self.__bank_buttons_list:
@@ -104,7 +119,23 @@ class DrumPadModule(QWidget):
                 if sub_layout is not None:
                     self.clear_grid_layout(sub_layout)  # Recursively clear nested layouts
 
+    def __create_pad_voices(self):
+        temp_list = []
+        for i in range(len(mn.NOTE_FREQUENCIES_LIST)):
+            freq = mn.NOTE_FREQUENCIES_LIST[i]
+            voice = SynthVoice(WaveForm.TRIANGLE, float(freq), 1.0, 1.0, 44100)
+            temp_list.append(voice)
 
+        return temp_list
 
+    def __create_audio_channels(self):
+        temp_list = []
+        for i in range(len(self.__pad_voices_list)):
+            audio_channel = AudioChannel(i, self.__pad_voices_list[i], volume=0.5, pan=0.5)
+            temp_list.append(audio_channel)
 
+        return temp_list
 
+    def __add_channels_to_engine(self):
+        for channel in self.__audio_channels_list:
+            self.__sound_engine.add_channel(channel)
