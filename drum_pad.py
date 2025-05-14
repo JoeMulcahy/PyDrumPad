@@ -1,23 +1,24 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QPushButton, QGridLayout, QSizePolicy
+from PyQt6.QtWidgets import QWidget, QPushButton, QGridLayout, QSizePolicy, QVBoxLayout
 
 
 class DrumPad(QWidget):
     _pad_id = 0
 
-    def __init__(self, midi_number, pad_text="", width=60, height=60):
+    def __init__(self, midi_number, pad_text_note="", pad_file_text="", width=60, height=60):
         super().__init__()
         self.__btn_pad = QPushButton()
         self.__id = DrumPad._pad_id
         self.__midi_number = midi_number
         self.__width = width
         self.__height = height
-        self.__pad_text = pad_text
+        self.__pad_text_note = pad_text_note
+        self.__pad_text_note = pad_file_text
 
         self.__is_selected = False
 
         self.__btn_pad.setFixedSize(width, height)
-        self.__btn_pad.setText(pad_text)
+        self.__btn_pad.setText(pad_text_note)
 
         self.__size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.setSizePolicy(self.__size_policy)
@@ -42,11 +43,19 @@ class DrumPad(QWidget):
                 }
             """
 
-        # self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
+        self.__drum_pad_content_style = \
+            """
+                QPushButton { 
+                    font-size: 8px;
+                    color: #ffffff;
+                    background-color: #0b522b;
+                    text-align: top center;
+                }
+            """
 
         self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
 
-        layout = QGridLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.__btn_pad)
         self.setLayout(layout)
 
@@ -59,6 +68,9 @@ class DrumPad(QWidget):
     def unselect(self):
         self.__is_selected = False
         self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
+
+    def has_content(self):
+        self.__btn_pad.setStyleSheet(self.__drum_pad_content_style)
 
     @property
     def button(self):
@@ -78,11 +90,11 @@ class DrumPad(QWidget):
 
     @property
     def pad_text(self):
-        return self.__pad_text
+        return self.__pad_text_note
 
     @pad_text.setter
     def pad_text(self, value):
-        self.__pad_text = value
+        self.__pad_text_note = value
 
     @property
     def width(self):

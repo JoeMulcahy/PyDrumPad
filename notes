@@ -1,16 +1,23 @@
 
+
 TO DO
-    - load audio sample to pad
-    - load samples on init
     - align sample start and end pos with sample view start and end
+    - each sample in editor will need its own settings [start, end etc]
+        - on pad change get [start, end etc] and update editor
+    - if start > end -> reverse playback
+    - add color to pads with samples
+    - add file name to pads
     - implement pitch, stretch sample. Update sample view to reflect changes
-    - load preset
+    - separate logic from gui in drum_pads_module. move logic to drum_pad_app
+    - reset
+    - load preset (temp: load samples in folder to pads)
     - save preset
     - reduce midi latency
 
 Nice to haves
     - load multiple samples on a single pad. Use note and velocity to trigger sample
     - sound fx
+    - zoomable waveform in editor
 
 Audio Engine tweaks
 -   sound channel
@@ -20,6 +27,12 @@ Audio Engine tweaks
     -   changeable audio buffer in sound engine
     -   allow for user settings [buffer size, sample rate]
     -   aux channels
+
+   Problems with the Sound Engine
+-   any voice changes requires
+    - a new voice
+    - replacing the voice in the audio channel
+    - updating the audio channels in the sound engine
 
 Ideas
     - mode to arrange pads like a keyboards

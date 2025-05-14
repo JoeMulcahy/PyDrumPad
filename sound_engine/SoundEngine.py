@@ -39,6 +39,19 @@ class SoundEngine:
             # Clip to avoid overflow
             np.clip(mix, -1.0, 1.0, out=outdata)
 
+    # def update_channel(self, channels):
+    #     self.__channels = channels
+
+    def list_voices_in_channels(self):
+        print(f'######################################################################')
+        for c in self.__channels:
+            v = c.voice
+            print(v)
+
+    def update_audio_channels(self, audio_channels):
+        with self.lock:
+            self.__channels = audio_channels
+
     def add_channel(self, channel: AudioChannel):
         with self.lock:
             self.__channels.append(channel)

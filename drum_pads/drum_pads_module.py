@@ -5,6 +5,7 @@ from app_enums.wave_form_enum import WaveForm
 from drum_pad import DrumPad
 import utility.music_notes as mn
 from sound_engine.AudioChannel import AudioChannel
+from sound_engine.AudioVoice import AudioVoice
 from sound_engine.SoundEngine import SoundEngine
 from sound_engine.SynthVoice import SynthVoice
 
@@ -28,6 +29,8 @@ class DrumPadModule(QWidget):
         self.__pad_voices_list = self.__create_pad_voices()
         self.__audio_channels_list = self.__create_audio_channels()
         self.__add_channels_to_engine()
+
+        self.test_list_voice()
 
         # banks initialisation
         bank_buttons_layout = QGridLayout()
@@ -137,9 +140,20 @@ class DrumPadModule(QWidget):
 
         return temp_list
 
+    def load_voice_to_pad(self, file, pad_index):
+        voice = AudioVoice(file)
+        self.__pad_voices_list[pad_index] = voice
+        audio_channel = AudioChannel(pad_index, voice, volume=1.0, pan=0.5)
+        self.__audio_channels_list[pad_index] = audio_channel
+        print('------------------------')
+        self.test_list_voice()
+        self.__sound_engine.update_audio_channels(self.__audio_channels_list)
+
+
     def __add_channels_to_engine(self):
         for channel in self.__audio_channels_list:
             self.__sound_engine.add_channel(channel)
+
 
     @property
     def drum_pads_module(self):
@@ -160,6 +174,15 @@ class DrumPadModule(QWidget):
     @property
     def current_selected_voice(self):
         return self.__pad_voices_list[self.__currently_selected_pad_index]
+
+    def test_list_voice(self):
+        for voice in self.__pad_voices_list:
+            print(voice)
+
+    @property
+    def sound_engine(self):
+        return self.__sound_engine
+
 
 
 

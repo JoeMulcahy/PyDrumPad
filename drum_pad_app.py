@@ -1,6 +1,8 @@
+from PyQt6.QtCore import QObject
 from PyQt6.QtWidgets import QWidget, QGridLayout
 
 from drum_pads.drum_pads_module import DrumPadModule
+from file_manager.audio_file_manager import FileManager
 from globals_controls.globals_settings_module import GlobalControls
 from midi.app_midi import AppMidi
 from sample_editor.sample_view import SampleViewer
@@ -10,6 +12,9 @@ from sound_engine.SynthVoice import SynthVoice
 class DrumPadApp(QWidget):
     def __init__(self):
         super().__init__()
+        self.__selected_pad_index = 0
+
+        self.__file_manager = FileManager()
 
         self.__app_layout = QGridLayout()
         self.__pads = DrumPadModule()
@@ -29,6 +34,7 @@ class DrumPadApp(QWidget):
 
         # populate global_controls.device.combobox with available devices
         self.__global_controls.device_combo_box.addItems(self.__app_midi.ports_list)
+        self.__global_controls.load_preset_btn.clicked.connect(self.__load_samples_in_sequence)
 
         # global_controls.device.combobox listener
         self.__global_controls.device_combo_box.currentIndexChanged.connect(self.__change_port)
@@ -46,14 +52,35 @@ class DrumPadApp(QWidget):
         # listener for wave_viewer load sample button
         self.__sample_view.load_sample_button.clicked.connect(lambda: self.__load_sample())
 
+        # signal listeners
+        self.__file_manager.files_loaded_signal.connect(lambda l: self.load_voice_to_pad(l))
+
+    def __load_samples_in_sequence(self):
+        self.__file_manager.get_files_using_explorer()
+
     def __load_sample(self):
         index = self.__pads.current_selected_pad
-        # self.__pads.pad_list[index].
         print(f'pad index for load: {index}')
+        self.__file_manager.get_files_using_explorer("single")
+
+    def load_voice_to_pad(self, file_list: list):
+        print(f'test: {str(file_list[0])}')
+        print(f'selected pad: {self.__selected_pad_index}')
+
+        if len(file_list) == 1:
+            self.__pads.load_voice_to_pad(str(file_list[0]), self.__selected_pad_index)
+            self.update_editor_waveform(self.__selected_pad_index)
+        else:
+            for i in range(len(file_list)):
+                self.__pads.load_voice_to_pad(str(file_list[i]), (self.__selected_pad_index + i) % len(self.__pads.pad_list))
+
+            self.update_editor_waveform(self.__selected_pad_index)
+
 
     def update_editor_waveform(self, index):
         self.__sample_view.waveform_widget.sample_data = self.__pads.pad_voices[index].voice_data
         print(f'editor waveform: {index}')
+        self.__selected_pad_index = index
         self.repaint()
 
     def midi_trigger_note_on(self, on, note, velocity):
