@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QGridLayout, QGroupBox, QPushButton
 
 from app_enums.wave_form_enum import WaveForm
-from drum_pad import DrumPad
+from drum_pads.drum_pad import DrumPad
 import utility.music_notes as mn
 from sound_engine.AudioChannel import AudioChannel
 from sound_engine.AudioVoice import AudioVoice
