@@ -64,8 +64,6 @@ class WaveFormWidget(QWidget):
         painter.setPen(self.__pen)
         painter.drawLine(self.__end_pos - 2, 0, self.__end_pos - 2, self.__height)
 
-
-
     @property
     def start_position(self):
         return self.__start_pos

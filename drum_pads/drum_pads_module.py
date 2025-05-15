@@ -79,7 +79,6 @@ class DrumPadModule(QWidget):
             button.clicked.connect(lambda clicked, index=i: self.highlight_selected(index))
             button.pressed.connect(lambda index=i: self.trigger_pad(index))
 
-
     def highlight_selected(self, index):
         for pad in self.__pads_list:
             pad.unselect()
@@ -149,11 +148,9 @@ class DrumPadModule(QWidget):
         self.test_list_voice()
         self.__sound_engine.update_audio_channels(self.__audio_channels_list)
 
-
     def __add_channels_to_engine(self):
         for channel in self.__audio_channels_list:
             self.__sound_engine.add_channel(channel)
-
 
     @property
     def drum_pads_module(self):
@@ -182,7 +179,3 @@ class DrumPadModule(QWidget):
     @property
     def sound_engine(self):
         return self.__sound_engine
-
-
-
-
