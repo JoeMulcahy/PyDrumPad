@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QLabel, QDial, QGridLayout, QGroupBox, QWidget, QPus
 from sample_editor.waveform_widget import WaveFormWidget
 
 
-class SampleViewer(QWidget):
+class SampleEditor(QWidget):
     def __init__(self, sample_data):
         super().__init__()
         self.__sample_data = sample_data
@@ -100,6 +100,9 @@ class SampleViewer(QWidget):
             dial.setNotchesVisible(False)
             dial.setWrapping(False)
 
+            if dial in [self.__dial_pitch, self.__dial_stretch]:
+                dial.setValue(50)
+
     @property
     def waveform_widget(self):
         return self.__waveform_widget
@@ -112,14 +115,32 @@ class SampleViewer(QWidget):
     def start_pos_dial(self):
         return self.__dial_start
 
+    @start_pos_dial.setter
+    def start_pos_dial(self, value):
+        self.__dial_start.setValue(int(value * 100))
+        self.__change_sample_start(value)
+
     @property
     def end_pos_dial(self):
         return self.__dial_end
+
+    @end_pos_dial.setter
+    def end_pos_dial(self, value):
+        self.__dial_end.setValue(int(value * 100))
+        self.__change_sample_end(value)
 
     @property
     def pitch_dial(self):
         return self.__dial_pitch
 
+    @pitch_dial.setter
+    def pitch_dial(self, value):
+        self.__dial_pitch.setValue(int(value * 100))
+
     @property
     def stretch_dial(self):
         return self.__dial_stretch
+
+    @stretch_dial.setter
+    def stretch_dial(self, value):
+        self.__dial_stretch.setValue(int(value * 100))

@@ -6,12 +6,13 @@ from drum_pads.drum_pads_module import DrumPadModule
 from file_manager.audio_file_manager import FileManager
 from globals_controls.globals_settings_module import GlobalControls
 from midi.app_midi import AppMidi
-from sample_editor.sample_view import SampleViewer
+from sample_editor.sample_view import SampleEditor
 from sound_engine.AudioChannel import AudioChannel
 from sound_engine.AudioVoice import AudioVoice
 from sound_engine.SoundEngine import SoundEngine
 from sound_engine.SynthVoice import SynthVoice
 import utility.music_notes as mn
+from sound_engine.Voice import Voice
 
 
 class DrumPadApp(QWidget):
@@ -26,21 +27,24 @@ class DrumPadApp(QWidget):
         self.__audio_channels_list = []  # list of audio channel associated with pad
 
         # initialise sound engine and audio channels
-        self.__pad_voices_list = self.__create_pad_voices()
+        self.__pad_voices_list = self.__create_test_pad_voices()
+        self.__file_manager.get_files_list_from_directory(
+            "C:\\Users\\josep\\Desktop\\PyDrumPad\\audio_files\\test_preset_1")
         self.__audio_channels_list = self.__create_audio_channels()
+
         self.__add_channels_to_engine()
 
         self.__pads_module = DrumPadModule()
         self.__global_controls = GlobalControls()
 
-        test_sample = self.__pad_voices_list[0].voice_data
-        self.__sample_view = SampleViewer(test_sample)
+        # initialise sample editor
+        self.__sample_editor = SampleEditor(self.__pad_voices_list[0].voice_data)
         self.highlight_selected(self.__selected_pad_index)
 
         self.__app_layout = QGridLayout()
         self.__app_layout.addWidget(self.__pads_module, 0, 0, 4, 4)
         self.__app_layout.addWidget(self.__global_controls, 0, 4, 1, 3)
-        self.__app_layout.addWidget(self.__sample_view, 1, 4, 3, 3)
+        self.__app_layout.addWidget(self.__sample_editor, 1, 4, 3, 3)
 
         self.setLayout(self.__app_layout)
 
@@ -73,25 +77,49 @@ class DrumPadApp(QWidget):
             button.pressed.connect(lambda index=i: self.trigger_pad(index))
 
         # listener for wave_viewer load sample button
-        self.__sample_view.load_sample_button.clicked.connect(lambda: self.__load_sample())
+        self.__sample_editor.load_sample_button.clicked.connect(lambda: self.__load_sample())
 
         # listeners for wave_viewer start, end, stretch and pitch
-        self.__sample_view.start_pos_dial.clicked.connect()
-        self.__sample_view.end_pos_dial.clicked.connect()
-        self.__sample_view.pitch_dial.clicked.connect()
-        self.__sample_view.stretch_dial.clicked.connect()
+        self.__sample_editor.start_pos_dial.valueChanged.connect(self.__update_voice_start_position)
+        self.__sample_editor.end_pos_dial.valueChanged.connect(self.__update_voice_end_position)
+        self.__sample_editor.pitch_dial.valueChanged.connect(self.__update_voice_pitch)
+        self.__sample_editor.stretch_dial.valueChanged.connect(self.__update_voice_stretch)
 
         # signal listeners
         self.__file_manager.files_loaded_signal.connect(lambda l: self.load_voice(l))
 
+    def __update_voice_start_position(self, start):
+        start = max(0.00, min(start / 100, 1.0))
+        voice = self.__pad_voices_list[self.__selected_pad_index]
+        voice.sample_start_scaling = start
+        end = voice.sample_end_scaling
+        voice.set_voice_start_end_position(start, end)
+
+    def __update_voice_end_position(self, end):
+        end = max(0.00, min(end / 100, 1.0))
+        voice = self.__pad_voices_list[self.__selected_pad_index]
+        voice.sample_end_scaling = end / 100
+        start = voice.sample_start_scaling
+        voice.set_voice_start_end_position(start, end)
+
+    def __update_voice_pitch(self, value):
+        value = max(0.01, min(value / 100, 1.0))  # ensure value can't be 0
+        print(f'start: {value}')
+        self.__pad_voices_list[self.__selected_pad_index].set_pitch(value)
+
+    def __update_voice_stretch(self, value):
+        value = max(0.01, min(value / 100, 1.0))  # ensure value can't be 0
+        print(f'start: {value}')
+        self.__pad_voices_list[self.__selected_pad_index].set_time_stretch(value)
+
     ###############################################
     # create default pad voices
     ###############################################
-    def __create_pad_voices(self):
+    def __create_test_pad_voices(self):
         temp_list = []
         for i in range(len(mn.NOTE_FREQUENCIES_LIST)):
             freq = mn.NOTE_FREQUENCIES_LIST[i]
-            voice = SynthVoice(WaveForm.TRIANGLE, float(freq), 0.2, 1.0, 44100)
+            voice = SynthVoice(WaveForm.SIN, float(freq), 0.1, 0.0, 44100)
             temp_list.append(voice)
 
         return temp_list
@@ -163,14 +191,25 @@ class DrumPadApp(QWidget):
 
     def update_editor_waveform(self, index):
         print(f'editor waveform: {index}')
-        self.__sample_view.waveform_widget.sample_data = self.__pad_voices_list[index].voice_data
+        voice = self.__pad_voices_list[index]
+        data = voice.original_voice_data
+        self.__sample_editor.waveform_widget.sample_data = data
         self.__selected_pad_index = index
+
+        # set dials
+        self.__sample_editor.start_pos_dial = voice.sample_start_scaling
+        self.__sample_editor.end_pos_dial = voice.sample_end_scaling
+
+        # get pitch of voice
+        self.__sample_editor.pitch_dial = voice.pitch_factor
+        self.__sample_editor.stretch_dial = voice.stretch_factor
+
         self.repaint()
 
     def midi_trigger_note_on(self, on, note, velocity):
         index = (note - 36) + 32
-        self.__pads_module.trigger_pad(index)
-        self.__pads_module.highlight_selected(index)
+        self.trigger_pad(index)
+        self.highlight_selected(index)
 
     def midi_trigger_note_off(self, off, note):
         pass

@@ -1,14 +1,9 @@
 
 
 TO DO
-    - align sample start and end pos with sample view start and end
-    - each sample in editor will need its own settings [start, end etc]
-        - on pad change get [start, end etc] and update editor
-    - if start > end -> reverse playback
     - add color to pads with samples
     - add file name to pads
-    - implement pitch, stretch sample. Update sample view to reflect changes
-    - separate logic from gui in drum_pads_module. move logic to drum_pad_app
+    - sound engine - figure out the processing order of start, end, pitch, stretch
     - reset
     - load preset (temp: load samples in folder to pads)
     - save preset
@@ -18,6 +13,7 @@ Nice to haves
     - load multiple samples on a single pad. Use note and velocity to trigger sample
     - sound fx
     - zoomable waveform in editor
+    - if start > end -> reverse playback
 
 Audio Engine tweaks
 -   sound channel
@@ -29,6 +25,7 @@ Audio Engine tweaks
     -   aux channels
 
    Problems with the Sound Engine
+   -
 -   any voice changes requires
     - a new voice
     - replacing the voice in the audio channel

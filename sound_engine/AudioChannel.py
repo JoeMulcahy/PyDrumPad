@@ -1,7 +1,5 @@
 import numpy as np
-from scipy.signal import sosfiltfilt, butter
-import math
-from scipy.signal import sosfiltfilt, sosfilt
+from scipy.signal import sosfiltfilt
 
 from sound_engine import Voice
 

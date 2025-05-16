@@ -41,8 +41,6 @@ class LoadFilesFromDirectoryWorker(QObject):
                         if not self.extension:
                             file_path = str(self.directory) + '\\' + file.name
                             file_paths.append(file_path)
-                            print(f'test: {file_path}')
-                            # file_list.append(file)
                         elif file.suffix in self.extension:
                             file_list.append(file)
                             file_paths.append(file_path)
@@ -58,7 +56,6 @@ class LoadFilesFromDirectoryWorker(QObject):
             try:
                 with open(self.directory) as file:
                     file_path = str(self.directory)
-                    # file_list.append(file)
                     file_paths.append(file_path)
                     self.files_list_signal.emit(file_paths)
             except FileNotFoundError:

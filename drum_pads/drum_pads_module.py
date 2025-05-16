@@ -56,18 +56,6 @@ class DrumPadModule(QWidget):
             button = self.__bank_buttons_list[i]
             button.clicked.connect(lambda clicked, index=i: self.__update_bank_of_pads(index))
 
-    #     # listener for pads
-    #     for i, btn in enumerate(self.__pad_matrix_list):
-    #         button = btn.button
-    #         button.clicked.connect(lambda clicked, index=i: self.highlight_selected(index))
-    #
-    # def highlight_selected(self, index):
-    #     for pad in self.__pad_matrix_list:
-    #         pad.unselect()
-    #
-    #     self.__pad_matrix_list[index].select()
-    #     self.__currently_selected_pad_index = index
-
     #############################################
     ## update which bank of pads are visible
     #############################################

@@ -59,6 +59,8 @@ class SynthVoice(Voice):
     def frequency(self, value):
         self.__frequency = value
         self.__waveform.frequency = self.__frequency
+        self.__data = self.__waveform.waveform  # Get the new waveform data
+        super().update_data(self.__data)  # Update the data in the Voice class
 
     @property
     def volume(self):
