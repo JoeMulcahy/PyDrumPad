@@ -49,7 +49,7 @@ class DrumPad(QWidget):
                 QPushButton { 
                     font-size: 8px;
                     color: #ffffff;
-                    background-color: #0b522b;
+                    background-color: #456e46;
                     text-align: top center;
                 }
             """

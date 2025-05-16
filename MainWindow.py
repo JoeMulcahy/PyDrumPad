@@ -20,6 +20,18 @@ class MainWindow(QMainWindow):
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
 
+        self.drum_pad_app.restart_requested_signal.connect(self.reset)
+
+    def reset(self):
+        self.layout.removeWidget(self.drum_pad_app)
+        self.drum_pad_app.deleteLater()
+        self.drum_pad_app = None
+
+        self.drum_pad_app = DrumPadApp()
+        self.layout.addWidget(self.drum_pad_app)
+
+        self.drum_pad_app.restart_requested_signal.connect(self.reset)
+        self.central_widget.setLayout(self.layout)
 
     @property
     def main_window(self):

@@ -1,6 +1,7 @@
 import mido
 from mido.backends import rtmidi
 
+mido.set_backend('mido.backends.rtmidi')
 from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QThread
 
 
@@ -12,13 +13,12 @@ class MidiWorker(QObject):
         self.__port = port
         self.__is_running = True
         self.__inport = None
-        # mido.set_backend('mido.backends.rtmidi')
 
     @pyqtSlot()
     def run(self):
         print("MIDI Worker started.")
         try:
-            self.__inport = mido.open_input(self.__port, callback=self.handle_midi)
+            self.__inport = mido.open_input(self.__port, callback=self.handle_midi, autoreset=True)
         except Exception as e:
             print(f"Failed to open MIDI input: {e}")
             return
@@ -64,24 +64,25 @@ class AppMidi(QObject):
             print("No midi ports found")
             return
 
-        # default port [2] if it exists
-        if len(ports) > 2:
-            self.__selected_port = self.__ports_list[2]
-        else:
-            self.__selected_port = self.__ports_list[0]
+        self.__selected_port = self.__ports_list[0]
+        # self.open_inport()
 
     def open_inport(self):
-        self.__midi_worker = MidiWorker(self.__selected_port)
-        self.__thread = QThread()
-        self.__midi_worker.moveToThread(self.__thread)
+        if self.__selected_port:
+            self.__midi_worker = MidiWorker(self.__selected_port)
+            self.__thread = QThread()
+            self.__midi_worker.moveToThread(self.__thread)
 
-        self.__thread.started.connect(self.__midi_worker.run)
-        self.__thread.finished.connect(self.__midi_worker.deleteLater)
+            self.__thread.started.connect(self.__midi_worker.run)
+            self.__thread.finished.connect(self.__midi_worker.deleteLater)
 
-        # Connect signal to your handler method
-        self.__midi_worker.midi_message_received_signal.connect(self.process_midi_message)
+            # Connect signal to your handler method
+            self.__midi_worker.midi_message_received_signal.connect(self.process_midi_message)
 
-        self.__thread.start()
+            self.__thread.start()
+            self.__thread.setPriority(QThread.Priority.HighPriority)
+        else:
+            print('No midi port')
 
     def stop_inport(self):
         if self.__midi_worker:
@@ -92,7 +93,6 @@ class AppMidi(QObject):
             self.__thread = None
 
     def process_midi_message(self, msg):
-        print(msg)
         # Handle incoming MIDI message safely from the main thread
         if msg.type == 'note_on' and msg.velocity > 0:
             self.mm_signal_note_on.emit(True, msg.note, msg.velocity)

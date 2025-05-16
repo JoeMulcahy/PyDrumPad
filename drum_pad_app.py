@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtWidgets import QWidget, QGridLayout
+from PyQt6.QtWidgets import QWidget, QGridLayout, QMessageBox
 
 from app_enums.wave_form_enum import WaveForm
 from drum_pads.drum_pads_module import DrumPadModule
@@ -16,6 +16,7 @@ from sound_engine.Voice import Voice
 
 
 class DrumPadApp(QWidget):
+    restart_requested_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -30,6 +31,8 @@ class DrumPadApp(QWidget):
 
         # create default voices for pads
         self.__pad_voices_list = self.__create_empty_pad_voices()
+
+        # load test samples, comment out to start with no samples loaded
         self.__file_manager.get_files_list_from_directory(
             "C:\\Users\\josep\\Desktop\\PyDrumPad\\audio_files\\test_preset_1")
         self.__audio_channels_list = self.__create_audio_channels()
@@ -52,6 +55,7 @@ class DrumPadApp(QWidget):
         self.setLayout(self.__app_layout)
 
         self.__app_midi = AppMidi()
+        # self.__change_port(1)
 
         self.__pads_module.pad_matrix_list[self.__selected_pad_index].select()
         self.__sound_engine.play()  # active sound engine
@@ -62,7 +66,12 @@ class DrumPadApp(QWidget):
 
         # populate global_controls.device.combobox with available devices
         self.__global_controls.device_combo_box.addItems(self.__app_midi.ports_list)
+
+        # preset. partially implemented, loads sequence of samples to pads
         self.__global_controls.load_preset_btn.clicked.connect(self.__load_samples_in_sequence)
+
+        # reset app
+        self.__global_controls.reset_preset_btn.clicked.connect(self.__reset_application)
 
         # global_controls.device.combobox listener
         self.__global_controls.device_combo_box.currentIndexChanged.connect(self.__change_port)
@@ -125,7 +134,7 @@ class DrumPadApp(QWidget):
         temp_list = []
         for i in range(len(mn.NOTE_FREQUENCIES_LIST)):
             freq = mn.NOTE_FREQUENCIES_LIST[i]
-            voice = SynthVoice(WaveForm.SIN, float(freq), 0.2, 1.0, 44100)
+            voice = SynthVoice(WaveForm.SIN, float(freq), 0.0001, 0.0, 44100)
             temp_list.append(voice)
 
         return temp_list
@@ -152,7 +161,6 @@ class DrumPadApp(QWidget):
     # highlight pad and update currently_selected_pad_index
     ###############################################
     def highlight_selected(self, index):
-        print(f'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         for pad in self.__pads_module.pad_matrix_list:
             pad.unselect()
 
@@ -208,7 +216,6 @@ class DrumPadApp(QWidget):
         self.__sound_engine.update_audio_channels(self.__audio_channels_list)
 
     def update_editor_waveform(self, index):
-        print(f'editor waveform: {index}')
         voice = self.__pad_voices_list[index]
         data = voice.original_voice_data
         self.__sample_editor.waveform_widget.sample_data = data
@@ -241,6 +248,19 @@ class DrumPadApp(QWidget):
     def __change_port(self, index):
         self.__app_midi.select_midi_port(index)
         self.__app_midi.open_inport()
+
+    def __reset_application(self):
+        reply = QMessageBox.question(
+            self,
+            "Reset Drum Pads",
+            "Press ok to reset",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
+        )
+
+        if reply == QMessageBox.StandardButton.Ok:
+            self.restart_requested_signal.emit()  # Emit the signal
+        else:
+            print("User canceled restart.")
 
     @property
     def sound_engine(self):

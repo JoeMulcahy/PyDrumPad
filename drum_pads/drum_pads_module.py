@@ -15,7 +15,7 @@ class DrumPadModule(QWidget):
         self.__bank_buttons_list = []
 
         self.__bank_btn_default_style = ""
-        self.__bank_btn_selected_style = "QPushButton { background-color: #999999}"
+        self.__bank_btn_selected_style = "QPushButton { background-color: #aeb853}"
 
         # initialise bank buttons and add to bank_buttons_layout
         bank_buttons_layout = QGridLayout()

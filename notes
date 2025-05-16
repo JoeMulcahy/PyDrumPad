@@ -1,6 +1,9 @@
 Known bugs and issues
--   pressing pads in quick succession crash sound engine
-
+-   sample editor:
+    - start line doesn't align to actual starting position of sample
+-   midi
+    - changing the midi device after choosing an initial midi devices crashes application
+        - suspected issue with threading, running thread no closing
 
 TO DO
     - sound engine - figure out the processing order of start, end, pitch, stretch
