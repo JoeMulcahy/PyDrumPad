@@ -49,7 +49,7 @@ class DrumPadModule(QWidget):
         main_layout.addWidget(group_box)
         self.setLayout(main_layout)
 
-        self.__update_bank_of_pads(self.__bank_index)   # initial bank to display
+        self.__update_bank_of_pads(self.__bank_index)  # initial bank to display
 
         # listeners for bank buttons
         for i in range(len(self.__bank_buttons_list)):
@@ -68,7 +68,6 @@ class DrumPadModule(QWidget):
         self.__bank_index = index
         self.__clear_grid_layout()
         self.__update_visible_pads()
-
 
     def __update_visible_pads(self):
         visible_pads = []
@@ -91,6 +90,12 @@ class DrumPadModule(QWidget):
                 if sub_layout is not None:
                     self.clear_grid_layout(sub_layout)  # Recursively clear nested layouts
 
+    def refresh_pads(self):
+        for pad in self.__pad_matrix_list:
+            pad.unselect()
+
+
+
     @property
     def drum_pads_module(self):
         return self
@@ -98,7 +103,6 @@ class DrumPadModule(QWidget):
     @property
     def pad_matrix_list(self):
         return self.__pad_matrix_list
-
 
     @property
     def current_selected_pad_index(self):

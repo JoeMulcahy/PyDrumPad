@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QObject
+from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QGridLayout
 
 from app_enums.wave_form_enum import WaveForm
@@ -6,7 +6,7 @@ from drum_pads.drum_pads_module import DrumPadModule
 from file_manager.audio_file_manager import FileManager
 from globals_controls.globals_settings_module import GlobalControls
 from midi.app_midi import AppMidi
-from sample_editor.sample_view import SampleEditor
+from sample_editor.sample_editor import SampleEditor
 from sound_engine.AudioChannel import AudioChannel
 from sound_engine.AudioVoice import AudioVoice
 from sound_engine.SoundEngine import SoundEngine
@@ -16,30 +16,33 @@ from sound_engine.Voice import Voice
 
 
 class DrumPadApp(QWidget):
+
     def __init__(self):
         super().__init__()
         self.__selected_pad_index = 0
 
         self.__file_manager = FileManager()
         self.__sound_engine = SoundEngine()
+        # self.__sound_engine.list_audio_devices()
 
         self.__pad_voices_list = []  # list of voices associated with pad
         self.__audio_channels_list = []  # list of audio channel associated with pad
 
-        # initialise sound engine and audio channels
-        self.__pad_voices_list = self.__create_test_pad_voices()
+        # create default voices for pads
+        self.__pad_voices_list = self.__create_empty_pad_voices()
         self.__file_manager.get_files_list_from_directory(
             "C:\\Users\\josep\\Desktop\\PyDrumPad\\audio_files\\test_preset_1")
         self.__audio_channels_list = self.__create_audio_channels()
 
-        self.__add_channels_to_engine()
+        self.__filenames = ["" for s in range(len(self.__pad_voices_list))]
 
+        self.__add_channels_to_engine()
         self.__pads_module = DrumPadModule()
+
         self.__global_controls = GlobalControls()
 
         # initialise sample editor
         self.__sample_editor = SampleEditor(self.__pad_voices_list[0].voice_data)
-        self.highlight_selected(self.__selected_pad_index)
 
         self.__app_layout = QGridLayout()
         self.__app_layout.addWidget(self.__pads_module, 0, 0, 4, 4)
@@ -88,6 +91,9 @@ class DrumPadApp(QWidget):
         # signal listeners
         self.__file_manager.files_loaded_signal.connect(lambda l: self.load_voice(l))
 
+        self.highlight_selected(self.__selected_pad_index)
+
+
     def __update_voice_start_position(self, start):
         start = max(0.00, min(start / 100, 1.0))
         voice = self.__pad_voices_list[self.__selected_pad_index]
@@ -115,11 +121,11 @@ class DrumPadApp(QWidget):
     ###############################################
     # create default pad voices
     ###############################################
-    def __create_test_pad_voices(self):
+    def __create_empty_pad_voices(self):
         temp_list = []
         for i in range(len(mn.NOTE_FREQUENCIES_LIST)):
             freq = mn.NOTE_FREQUENCIES_LIST[i]
-            voice = SynthVoice(WaveForm.SIN, float(freq), 0.1, 0.0, 44100)
+            voice = SynthVoice(WaveForm.SIN, float(freq), 0.2, 1.0, 44100)
             temp_list.append(voice)
 
         return temp_list
@@ -146,6 +152,7 @@ class DrumPadApp(QWidget):
     # highlight pad and update currently_selected_pad_index
     ###############################################
     def highlight_selected(self, index):
+        print(f'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         for pad in self.__pads_module.pad_matrix_list:
             pad.unselect()
 
@@ -171,19 +178,30 @@ class DrumPadApp(QWidget):
     def __load_sample(self):
         self.__file_manager.get_files_using_explorer("single")
 
+    ################################################
+    ##  load voices into pads
+    ##  update editor
+    ##  add color to pad
+    ################################################
     def load_voice(self, file_list: list):
         if len(file_list) == 1:
-            self.load_voice_to_pad(str(file_list[0]), self.__selected_pad_index)
+            self.load_audio_voice_to_pad(str(file_list[0]), self.__selected_pad_index)
             self.update_editor_waveform(self.__selected_pad_index)
+            self.__pads_module.pad_matrix_list[self.__selected_pad_index].has_content = True
         else:
             for i in range(len(file_list)):
-                self.load_voice_to_pad(str(file_list[i]),
-                                       (self.__selected_pad_index + i) % len(self.__pads_module.pad_matrix_list))
+                self.load_audio_voice_to_pad(str(file_list[i]),
+                                             (self.__selected_pad_index + i) % len(self.__pads_module.pad_matrix_list))
+                self.__pads_module.pad_matrix_list[self.__selected_pad_index + i].has_content = True
 
             self.update_editor_waveform(self.__selected_pad_index)
+            self.__pads_module.refresh_pads()
 
-    def load_voice_to_pad(self, file, pad_index):
-        voice = AudioVoice(file)
+    def load_audio_voice_to_pad(self, file, pad_index):
+        filename = file.split('\\')
+        filename = filename[-1]
+        self.__filenames[pad_index] = filename
+        voice: AudioVoice = AudioVoice(file)
         self.__pad_voices_list[pad_index] = voice
         audio_channel = AudioChannel(pad_index, voice, volume=1.0, pan=0.5)
         self.__audio_channels_list[pad_index] = audio_channel
@@ -194,6 +212,7 @@ class DrumPadApp(QWidget):
         voice = self.__pad_voices_list[index]
         data = voice.original_voice_data
         self.__sample_editor.waveform_widget.sample_data = data
+        self.__sample_editor.filename = self.__filenames[index]
         self.__selected_pad_index = index
 
         # set dials
@@ -226,3 +245,7 @@ class DrumPadApp(QWidget):
     @property
     def sound_engine(self):
         return self.__sound_engine
+
+    @property
+    def drum_pad_app(self):
+        return self

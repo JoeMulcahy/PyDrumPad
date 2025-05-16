@@ -1,8 +1,8 @@
+Known bugs and issues
+-   pressing pads in quick succession crash sound engine
 
 
 TO DO
-    - add color to pads with samples
-    - add file name to pads
     - sound engine - figure out the processing order of start, end, pitch, stretch
     - reset
     - load preset (temp: load samples in folder to pads)

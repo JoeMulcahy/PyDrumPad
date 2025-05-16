@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QWidget, QPushButton, QGridLayout, QSizePolicy, QVBo
 class DrumPad(QWidget):
     _pad_id = 0
 
-    def __init__(self, midi_number, pad_text_note="", pad_file_text="", width=60, height=60):
+    def __init__(self, midi_number, pad_text_note="", pad_file_text="", width=60, height=60, has_content=False):
         super().__init__()
         self.__btn_pad = QPushButton()
         self.__id = DrumPad._pad_id
@@ -16,6 +16,7 @@ class DrumPad(QWidget):
         self.__pad_text_note = pad_file_text
 
         self.__is_selected = False
+        self.__has_content = has_content
 
         self.__btn_pad.setFixedSize(width, height)
         self.__btn_pad.setText(pad_text_note)
@@ -53,7 +54,10 @@ class DrumPad(QWidget):
                 }
             """
 
-        self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
+        if has_content:
+            self.__btn_pad.setStyleSheet(self.__drum_pad_content_style)
+        else:
+            self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
 
         layout = QVBoxLayout()
         layout.addWidget(self.__btn_pad)
@@ -67,10 +71,10 @@ class DrumPad(QWidget):
 
     def unselect(self):
         self.__is_selected = False
-        self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
-
-    def has_content(self):
-        self.__btn_pad.setStyleSheet(self.__drum_pad_content_style)
+        if self.__has_content:
+            self.__btn_pad.setStyleSheet(self.__drum_pad_content_style)
+        else:
+            self.__btn_pad.setStyleSheet(self.__drum_pad_default_style)
 
     @property
     def button(self):
@@ -112,4 +116,10 @@ class DrumPad(QWidget):
     def height(self, value):
         self.__height = value
 
+    @property
+    def has_content(self):
+        return self.__has_content
 
+    @has_content.setter
+    def has_content(self, value):
+        self.__has_content = value

@@ -1,16 +1,18 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QLabel, QDial, QGridLayout, QGroupBox, QWidget, QPushButton
 
 from sample_editor.waveform_widget import WaveFormWidget
 
 
 class SampleEditor(QWidget):
-    def __init__(self, sample_data):
+    def __init__(self, sample_data, filename=""):
         super().__init__()
         self.__sample_data = sample_data
         self.__start_position = 0
         self.__end_position = 0
         self.__sample_pitch = 0.0
         self.__sample_stretch = 0.0
+        self.__filename = filename
 
         self.__btn__load_sample = QPushButton("Load")
 
@@ -26,7 +28,10 @@ class SampleEditor(QWidget):
         self.__lbl_stretch = QLabel('stretch')
         self.__dial_stretch = QDial()
 
-        self.__waveform_widget = WaveFormWidget(sample_data, 300, 180, 0, 0)
+        self.__lbl_file_name = QLabel('filename: ')
+        self.__lbl_file_name_text = QLabel('')
+
+        self.__waveform_widget = WaveFormWidget(sample_data, 300, 140, 0, 0)
         self.__waveform_widget.setGeometry(100, 100, 800, 200)
 
         self.__lbl_blank = QLabel()
@@ -55,10 +60,16 @@ class SampleEditor(QWidget):
         waveform_layout = QGridLayout()
         waveform_layout.addWidget(self.__waveform_widget, 0, 0)
 
+        filename_layout = QGridLayout()
+        # filename_layout.addWidget(self.__lbl_file_name, 0, 0, 1, 1)
+        filename_layout.addWidget(self.__lbl_file_name_text, 0, 0, 1, 1)
+
         group_box = QGroupBox('Editor')
         editor_layout = QGridLayout()
         editor_layout.addLayout(control_layout, 0, 0, 1, 1)
-        editor_layout.addLayout(waveform_layout, 1, 0, 1, 1)
+        editor_layout.addLayout(filename_layout, 1, 0, 1, 1, Qt.AlignmentFlag.AlignHCenter)
+        editor_layout.addLayout(waveform_layout, 2, 0, 5, 4)
+
 
         group_box.setLayout(editor_layout)
 
@@ -86,7 +97,7 @@ class SampleEditor(QWidget):
         label_style = "QLabel { font-size: 8px}"
 
         for lbl in [
-            self.__lbl_start, self.__lbl_end, self.__lbl_pitch, self.__lbl_stretch
+            self.__lbl_start, self.__lbl_end, self.__lbl_pitch, self.__lbl_stretch, self.__lbl_file_name_text
         ]:
             lbl.setStyleSheet(label_style)
 
@@ -144,3 +155,11 @@ class SampleEditor(QWidget):
     @stretch_dial.setter
     def stretch_dial(self, value):
         self.__dial_stretch.setValue(int(value * 100))
+
+    @property
+    def filename(self):
+        return self.__lbl_file_name_text.text()
+
+    @filename.setter
+    def filename(self, value):
+        self.__lbl_file_name_text.setText(value)

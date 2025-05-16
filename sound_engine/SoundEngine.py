@@ -1,3 +1,4 @@
+import sys
 import threading
 
 import numpy as np
@@ -21,10 +22,12 @@ class SoundEngine:
         self.block_duration = 0.0  # Store the duration of each audio callback block
         self.__master_volume = 0.5
 
+        self.device_list = []
+
     def audio_callback(self, outdata, frames, time, status):
         with self.lock:
             mix = np.zeros((frames, 2), dtype=np.float32)
-            self.block_duration = frames / self.__samplerate  # Calculate duration of the block
+            self.block_duration = frames / int(self.__samplerate)   # Calculate duration of the block
             self.current_time += self.block_duration
 
             for channel in self.__channels:
@@ -62,6 +65,57 @@ class SoundEngine:
 
     def set_master_volume(self, value):
         self.__master_volume = value
+
+    def list_audio_devices(self):
+        """Prints a list of audio devices."""
+        devices = sd.query_devices()
+        default_input_device_index = sd.default.device[0]
+        default_output_device_index = sd.default.device[1]
+        for i, device in enumerate(devices):
+            print(f"Device {i}: {device['name']} (Driver: {device['hostapi']})")
+            if i == default_input_device_index:
+                print(f"  (Default Input Device)")
+            if i == default_output_device_index:
+                print(f"  (Default Output Device)")
+            # The following code will cause an error on systems without MIDI support
+            if sys.platform.startswith('win') or sys.platform.startswith('darwin'):
+                try:
+                    default_midi_input_device_index = sd.default.midi_input
+                    default_midi_output_device_index = sd.default.midi_output
+                    if i == default_midi_input_device_index:
+                        print(f"  (Default MIDI Input Device)")
+                    if i == default_midi_output_device_index:
+                        print(f"  (Default MIDI Output Device)")
+                except AttributeError:
+                    print("  (No default MIDI devices)")
+
+    if __name__ == "__main__":
+        list_audio_devices()
+
+    def get_default_devices(self):
+        devices = sd.query_devices()
+        default_input_device_index = sd.default.device[0]
+        default_output_device_index = sd.default.device[1]
+        default_midi_input_device_index = sd.default.midi_input
+        default_midi_output_device_index = sd.default.midi_output
+
+        for i, device in enumerate(devices):
+            # print(f"Device {i}: {device['name']}")
+            if i == default_input_device_index:
+                print(f"  (Default Input Device)")
+                print(f"Device {i}: {device['name']}")
+            if i == default_output_device_index:
+                print(f"  (Default Output Device)")
+                print(f"Device {i}: {device['name']}")
+            if i == default_midi_input_device_index:
+                print(f"  (Default MIDI Input Device)")
+                print(f"Device {i}: {device['name']}")
+            if i == default_midi_output_device_index:
+                print(f"  (Default MIDI Output Device)")
+                print(f"Device {i}: {device['name']}")
+
+
+
 
     @property
     def sample_rate(self):

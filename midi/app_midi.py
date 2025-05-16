@@ -12,7 +12,7 @@ class MidiWorker(QObject):
         self.__port = port
         self.__is_running = True
         self.__inport = None
-        mido.set_backend('mido.backends.rtmidi')
+        # mido.set_backend('mido.backends.rtmidi')
 
     @pyqtSlot()
     def run(self):
@@ -58,7 +58,6 @@ class AppMidi(QObject):
     def __initialise_midi(self):
         ports = mido.get_input_names()
         for i, port in enumerate(ports):
-            print(f'ports: {port}')
             self.__ports_list.append(port)
 
         if not ports:
@@ -93,6 +92,7 @@ class AppMidi(QObject):
             self.__thread = None
 
     def process_midi_message(self, msg):
+        print(msg)
         # Handle incoming MIDI message safely from the main thread
         if msg.type == 'note_on' and msg.velocity > 0:
             self.mm_signal_note_on.emit(True, msg.note, msg.velocity)

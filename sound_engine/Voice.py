@@ -39,7 +39,7 @@ class Voice:
                             dtype=np.float32)
 
         self.__end_position = self.__position + frames
-        print(f'in chunk start {self.__position} end: {self.__end_position}')
+        # print(f'in chunk start {self.__position} end: {self.__end_position}')
         chunk = self.__data[self.__position:self.__end_position]
 
         # Ensure chunk is 2D
@@ -69,10 +69,10 @@ class Voice:
         self.__sample_end = int(data_length * (1.0 - end))  # calculate end sample
         self.__sample_start = int(data_length * start)  # calculate starting sample
 
-        print('-----------------------------------------------------')
-        print(f'sample len: {data_length}')
-        print(f'scale_start: {self.__sample_start_scaling}  scale_end: {self.__sample_end_scaling}')
-        print(f'sample_start: {self.__sample_start}  sample_end: {self.__sample_end}')
+        # print('-----------------------------------------------------')
+        # print(f'sample len: {data_length}')
+        # print(f'scale_start: {self.__sample_start_scaling}  scale_end: {self.__sample_end_scaling}')
+        # print(f'sample_start: {self.__sample_start}  sample_end: {self.__sample_end}')
 
         # Handle mono or stereo safely
         if temp_data.ndim == 1:  # Mono
@@ -199,7 +199,6 @@ class Voice:
 
         self._playback_thread = threading.Thread(target=self.__play_audio(is_pre))
         self._playback_thread.start()
-        print(f"Started playback of: sound on a new thread.")
 
     def __play_audio(self, is_pre):
         try:
@@ -208,7 +207,7 @@ class Voice:
             else:
                 sd.play(self.__data_manipulated, self.__samplerate)
 
-            # sd.wait()
+            sd.wait()
         except Exception as e:
             print(f"Error during playback of sound: {e}")
         finally:
