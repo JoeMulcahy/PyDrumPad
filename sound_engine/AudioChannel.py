@@ -5,11 +5,12 @@ from sound_engine import Voice
 
 
 class AudioChannel:
-    def __init__(self, channel_id, voice: Voice, volume=1.0, pan=0.0):
+    def __init__(self, channel_id, voice: Voice, volume=0.8, pan_scaled=0.5):
         self.__id = channel_id
         self.__voice = voice
         self.__volume = volume  # 0.0 to 1.0
-        self.__pan = pan  # -1.0 (L) to 1.0 (R)
+        self.__pan = 0  # -1.0 (L) to 1.0 (R)
+        self.__pan_scaled = pan_scaled  # 0.0 to 1.0
         self.is_playing = False  # Add is_playing attribute
         self.start_time = 0  # Add start_time attribute
 
@@ -124,10 +125,6 @@ class AudioChannel:
     def volume(self):
         return self.__volume
 
-    @property
-    def pan(self):
-        return self.__pan
-
     @voice.setter
     def voice(self, value):
         self.__voice = value
@@ -136,9 +133,14 @@ class AudioChannel:
     def volume(self, value):
         self.__volume = value
 
-    @pan.setter
-    def pan(self, value):
-        self.__pan = value
+    @property
+    def pan_scaled(self):
+        return self.__pan_scaled
+
+    @pan_scaled.setter
+    def pan_scaled(self, value):
+        self.__pan_scaled = value
+        self.__pan = (self.__pan_scaled - 0.5) * 2
 
     @property
     def is_muted(self):

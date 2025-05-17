@@ -8,14 +8,16 @@ from sound_engine import AudioChannel
 
 
 class SoundEngine:
-    def __init__(self, samplerate=44100):
+    def __init__(self, samplerate=44100, latency=0.03, block_size=128):
         self.__channels = []
         self.__samplerate = samplerate
         self.stream = sd.OutputStream(
             samplerate=samplerate,
             channels=2,
             dtype='float32',
-            callback=self.audio_callback
+            callback=self.audio_callback,
+            blocksize=block_size,
+            latency=latency
         )
         self.lock = threading.Lock()
         self.current_time = 0  # Keep track of the current time.

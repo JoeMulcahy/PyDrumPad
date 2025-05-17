@@ -100,7 +100,7 @@ class DrumPadApp(QWidget):
         # listener for wave_viewer load sample button
         self.__sample_editor.load_sample_button.clicked.connect(lambda: self.__load_sample())
 
-        # listeners for wave_viewer start, end, stretch and pitch
+        # listeners for sample editor start, end, stretch and pitch
         self.__sample_editor.start_pos_dial.valueChanged.connect(self.__update_voice_start_position)
         self.__sample_editor.end_pos_dial.valueChanged.connect(self.__update_voice_end_position)
         self.__sample_editor.pitch_dial.valueChanged.connect(self.__update_voice_pitch)
@@ -186,7 +186,7 @@ class DrumPadApp(QWidget):
                 settings_dict["file_name"] = self.__filenames_list[i]
                 settings_dict["pad_voice_data"] = self.__pad_voices_list[i].original_voice_data
                 settings_dict["volume"] = self.__audio_channels_list[i].volume
-                settings_dict["pan"] = self.__audio_channels_list[i].pan
+                settings_dict["pan"] = self.__audio_channels_list[i].pan_scaled
                 settings_dict["start"] = self.__sample_editor.start_pos_dial = self.__pad_voices_list[
                     i].sample_start_scaling
                 settings_dict["end"] = self.__sample_editor.end_pos_dial = self.__pad_voices_list[i].sample_end_scaling
@@ -225,12 +225,12 @@ class DrumPadApp(QWidget):
 
     def __update_voice_pitch(self, value):
         value = max(0.01, min(value / 100, 1.0))  # ensure value can't be 0
-        print(f'start: {value}')
-        self.__pad_voices_list[self.__selected_pad_index].set_pitch(value)
+        print(f'pitch: {value}')
+        self.__pad_voices_list[self.__selected_pad_index].pitch_factor = value
 
     def __update_voice_stretch(self, value):
         value = max(0.01, min(value / 100, 1.0))  # ensure value can't be 0
-        print(f'start: {value}')
+        print(f'stretch: {value}')
         self.__pad_voices_list[self.__selected_pad_index].set_time_stretch(value)
 
     def __update_channel_volume(self, value):
@@ -240,8 +240,7 @@ class DrumPadApp(QWidget):
 
     def __update_channel_pan(self, value):
         value = max(0.01, min(value / 100, 1.0))  # ensure value can't be 0
-        print(f'pan: {value}')
-        self.__audio_channels_list[self.__selected_pad_index].pan = value
+        self.__audio_channels_list[self.__selected_pad_index].pan_scaled = value
 
     ###############################################
     # create default pad voices
@@ -261,7 +260,7 @@ class DrumPadApp(QWidget):
     def __create_audio_channels(self):
         temp_list = []
         for i in range(len(self.__pad_voices_list)):
-            audio_channel = AudioChannel(i, self.__pad_voices_list[i], volume=0.5, pan=0.5)
+            audio_channel = AudioChannel(i, self.__pad_voices_list[i], volume=0.5, pan_scaled=0.5)
             temp_list.append(audio_channel)
 
         return temp_list
@@ -327,7 +326,7 @@ class DrumPadApp(QWidget):
         self.__filenames_list[pad_index] = filename
         voice: AudioVoice = AudioVoice(file)
         self.__pad_voices_list[pad_index] = voice
-        audio_channel = AudioChannel(pad_index, voice, volume=1.0, pan=0.5)
+        audio_channel = AudioChannel(pad_index, voice, volume=1.0, pan_scaled=0.5)
         self.__audio_channels_list[pad_index] = audio_channel
         self.__sound_engine.update_audio_channels(self.__audio_channels_list)
 
@@ -335,7 +334,7 @@ class DrumPadApp(QWidget):
         voice = self.__pad_voices_list[index]
         data = voice.original_voice_data
         channel_vol = self.__audio_channels_list[index].volume
-        channel_pan = self.__audio_channels_list[index].pan
+        channel_pan = self.__audio_channels_list[index].pan_scaled
         self.__sample_editor.waveform_widget.sample_data = data
         self.__sample_editor.filename = self.__filenames_list[index]
         self.__selected_pad_index = index

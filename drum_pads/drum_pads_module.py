@@ -17,8 +17,8 @@ class DrumPadModule(QWidget):
         self.__bank_btn_default_style = ""
         self.__bank_btn_selected_style = "QPushButton { background-color: #aeb853}"
 
-        self.__btn_load_pad = QPushButton('1')
-        self.__btn_load_directory = QPushButton('2')
+        self.__btn_load_pad = QPushButton('Load pad')
+        self.__btn_load_directory = QPushButton('Load directory')
 
         # initialise bank buttons and add to bank_buttons_layout
         bank_buttons_layout = QGridLayout()
@@ -48,8 +48,8 @@ class DrumPadModule(QWidget):
 
         module_layout = QGridLayout()
         module_layout.addLayout(bank_buttons_layout, 0, 0, )
-        module_layout.addLayout(self.__pads_layout, 1, 0)
-        module_layout.addLayout(self.__load_layout, 2, 0)
+        module_layout.addLayout(self.__pads_layout, 1, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
+        module_layout.addLayout(self.__load_layout, 2, 0, 1, 1, Qt.AlignmentFlag.AlignLeft)
 
 
         group_box.setLayout(module_layout)

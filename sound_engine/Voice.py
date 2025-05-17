@@ -88,13 +88,13 @@ class Voice:
     ############################################################################
     ## Alter pitch of voice using resampling
     ############################################################################
-    def set_pitch(self, pitch_factor):
+    def set_pitch(self):
         """Alter the pitch by adjusting the pitch factor."""
-        self.__pitch_factor = pitch_factor * 2
-        self.__resample_audio()
+        ratio = self.__pitch_factor * 2
+        self.__resample_audio(ratio)
 
-    def __resample_audio(self):
-        new_samplerate = self.__original_sample_rate * (1 / self.__pitch_factor)
+    def __resample_audio(self, ratio):
+        new_samplerate = self.__original_sample_rate * (1 / ratio)
         if new_samplerate <= self.__original_sample_rate / 4:
             new_samplerate = self.__original_sample_rate / 4
 
@@ -117,7 +117,7 @@ class Voice:
         try:
             # Perform the resampling using librosa
             self.__data_manipulated = librosa.resample(
-                self.__data, orig_sr=self.__original_sample_rate, target_sr=new_samplerate
+                self.__original_data, orig_sr=self.__original_sample_rate, target_sr=new_samplerate
             )
             # self.__samplerate = new_samplerate  # Update the samplerate
             self.__data = self.__data_manipulated
@@ -299,7 +299,7 @@ class Voice:
     @pitch_factor.setter
     def pitch_factor(self, value):
         self.__pitch_factor = value
-        self.set_pitch(value)
+        self.set_pitch()
 
     @property
     def stretch_factor(self):
