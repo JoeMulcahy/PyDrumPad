@@ -101,7 +101,7 @@ class Voice:
         if new_samplerate >= self.__original_sample_rate * 4:
             new_samplerate = self.__original_sample_rate * 4
 
-        print(f"Resampling audio from {self.__samplerate}Hz to {new_samplerate}Hz.")
+        print(f"Resampling audio from {self.__original_sample_rate}Hz to {new_samplerate}Hz.")
         # Check if self.__data is a numpy array
         if not isinstance(self.__data, np.ndarray):
             raise TypeError(f"Expected self.__data to be a numpy array, but got {type(self.__data)}")
@@ -116,8 +116,10 @@ class Voice:
 
         try:
             # Perform the resampling using librosa
-            self.__data_manipulated = librosa.resample(self.__data, orig_sr=self.__samplerate, target_sr=new_samplerate)
-            self.__samplerate = new_samplerate  # Update the samplerate
+            self.__data_manipulated = librosa.resample(
+                self.__data, orig_sr=self.__original_sample_rate, target_sr=new_samplerate
+            )
+            # self.__samplerate = new_samplerate  # Update the samplerate
             self.__data = self.__data_manipulated
         except Exception as e:
             print(f"Error during resampling: {e}")
@@ -245,6 +247,10 @@ class Voice:
     @property
     def voice_data(self):
         return self.__data
+
+    @voice_data.setter
+    def voice_data(self, value):
+        self.__data = value
 
     @property
     def position(self):

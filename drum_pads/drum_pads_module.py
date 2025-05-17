@@ -17,6 +17,9 @@ class DrumPadModule(QWidget):
         self.__bank_btn_default_style = ""
         self.__bank_btn_selected_style = "QPushButton { background-color: #aeb853}"
 
+        self.__btn_load_pad = QPushButton('1')
+        self.__btn_load_directory = QPushButton('2')
+
         # initialise bank buttons and add to bank_buttons_layout
         bank_buttons_layout = QGridLayout()
         for i in range(0, 6):
@@ -37,11 +40,17 @@ class DrumPadModule(QWidget):
 
         self.__update_visible_pads()  # display current bank of pads and add to self.__pads_layout
 
+        self.__load_layout = QGridLayout()
+        self.__load_layout.addWidget(self.__btn_load_pad, 0, 0, 1, 1)
+        self.__load_layout.addWidget(self.__btn_load_directory, 0, 1, 1, 1)
+
         group_box = QGroupBox('Pads')  # group box for pads matrix
 
         module_layout = QGridLayout()
         module_layout.addLayout(bank_buttons_layout, 0, 0, )
         module_layout.addLayout(self.__pads_layout, 1, 0)
+        module_layout.addLayout(self.__load_layout, 2, 0)
+
 
         group_box.setLayout(module_layout)
 
@@ -111,3 +120,11 @@ class DrumPadModule(QWidget):
     @property
     def bank_index(self):
         return self.__bank_index
+
+    @property
+    def load_button(self):
+        return self.__btn_load_pad
+
+    @property
+    def load_directory_button(self):
+        return self.__btn_load_directory

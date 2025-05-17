@@ -4,12 +4,15 @@ Known bugs and issues
 -   midi
     - changing the midi device after choosing an initial midi devices crashes application
         - suspected issue with threading, running thread no closing
+-   audio channel
+    - pan not behaving correctly. when panned left sounds like pan centered
+-   audio engine
+
+-
 
 TO DO
     - sound engine - figure out the processing order of start, end, pitch, stretch
-    - reset
-    - load preset (temp: load samples in folder to pads)
-    - save preset
+    - load preset: partially done. voice data not loading correctly
     - reduce midi latency
 
 Nice to haves
